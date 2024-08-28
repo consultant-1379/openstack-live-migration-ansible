@@ -1,0 +1,11 @@
+- name: Get a valid source compute hostname
+  pause:
+    prompt: "\e[96;1mPlease choose a valid source compute hostname from the above list - ex of a valid hostname:\e[93;1m929235-compute004.localdomain\e[0m"
+  register: srchost
+  until: (srchost.user_input in id.stdout_lines) != -1
+  retries: 5
+  delay: 2
+
+- name: validate source compute hostname
+  ansible.builtin.debug:
+    msg: 'You have entered a valid source compute hostname: {{ srchost.user_input }}'

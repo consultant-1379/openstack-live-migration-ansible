@@ -1,0 +1,19 @@
+# tasks for listing compute nodes
+
+    - name: list all hypervisors
+      shell: openstack --insecure hypervisor list --long --sort-column "vCPUs Used"
+
+      register: hypervisor_list
+
+    - name:  show hypervisors list
+      debug:
+        msg: "{{ hypervisor_list.stdout_lines }}"
+
+    - name: get hypervisor id only
+      shell: openstack --insecure hypervisor list --long --sort-column "vCPUs Used" | awk 'NR > 3' | awk '{ print $4 }'
+
+      register: id
+
+    - name: set a variable
+      ansible.builtin.set_fact:
+        x: "{{ id.stdout_lines }}"

@@ -1,0 +1,26 @@
+---
+# tasks file for listing VMs on compute host
+
+    - name: List all VMs on source compute host
+      shell: openstack --insecure server list --all-p --host {{ srchost.user_input }} --long -c ID -c Name -c Status -c "Flavor Name"
+      register: VMs_list
+
+    - name: print VMs list on source compute host
+      debug:
+        var: VMs_list.stdout_lines
+
+    - name: Register VMs id only
+      shell: openstack --insecure server list --all-p --host {{ srchost.user_input }} -c ID | awk 'NR > 3' | awk '{ print $2 }'
+      register: VM_ID
+
+    - name: choose a target VM to be migrated
+      pause:
+        prompt: "\e[1;96mPlease enter a valid target VM ID to be migrated ex:\e[1;93m9d9a3809-1e05-4730-b895-aade46a1ea9e"
+      register: Target_VM
+      until: (Target_VM.user_input in VM_ID.stdout_lines) != -1
+      retries: 5
+      delay: 2
+
+    - name: print target VM
+      ansible.builtin.debug:
+        msg: 'You have entered a valid target VM to be migrated {{ Target_VM.user_input }}'

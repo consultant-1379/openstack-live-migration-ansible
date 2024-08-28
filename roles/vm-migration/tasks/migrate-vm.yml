@@ -1,0 +1,9 @@
+---
+# tasks file for live migration operation
+
+- name: Live Migration Start Notification
+  debug:
+    msg: '{{ Target_VM.user_input }} will be migrated from {{ srchost.user_input }} to {{ dsthost.user_input }}'
+
+- name: Live Migration operation
+  shell: openstack --insecure server --os-compute-api-version=2.30 migrate --live-migration {{ Target_VM.user_input }} --host {{ dsthost.user_input }} --wait

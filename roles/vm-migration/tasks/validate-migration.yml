@@ -1,0 +1,14 @@
+---
+# tasks file for validation the live migration
+
+- name: Validate Live Migration
+  shell: openstack --insecure server show {{ Target_VM.user_input }}
+  register: migration_result 
+ 
+- name: Print Migration result
+  debug: 
+    msg: "Migration is successfull"
+  when: migration_result.stdout.find(dsthost.user_input) != -1
+
+- debug:
+    var: migration_result.stdout_lines

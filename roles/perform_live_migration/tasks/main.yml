@@ -1,0 +1,47 @@
+---
+# All live migration roles
+
+    - name: List all Compute Nodes
+      include_role:
+        name: compute_nodes
+        tasks_from: list_hypervisors
+
+    - name: Choose Source Compute Node from where you want to migrate the VM
+      include_role:
+        name: compute_nodes
+        tasks_from: srchost
+    
+    - name: Collect VMs data for migration
+      include_role:
+        name: vm-migration
+        tasks_from: "{{ item }}"
+      loop:
+       - list-vm
+
+    - name: Choose Destination Compute Node where you migrate the VM to
+      include_role:
+        name: compute_nodes
+        tasks_from: "{{ item }}"
+      loop:
+       - list_hypervisors
+       - dsthost
+
+    - name: VM Migration Full Operation
+      include_role:
+        name: vm-migration
+        tasks_from: "{{ item }}"
+      loop:
+       - migrate-vm
+       - validate-migration
+
+    - name: Migrate more VMs ?
+      pause:
+        prompt: "\e[96;1mWould you like to migrate more VMs ? \e[1;93mplease enter just \e[1;92myes/\e[1;91mno\e[0m" 
+      register: answer
+      until: answer.user_input == "yes" or answer.user_input == "no"
+      retries: 5
+
+    - name: Repeat live migration operation
+      include_role:
+        name: perform_live_migration
+      when: answer.user_input == "yes"    
